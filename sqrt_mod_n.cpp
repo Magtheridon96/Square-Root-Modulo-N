@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <tuple>
+#include <set>
 
 template<typename T, typename U>
 std::ostream& operator<<(std::ostream& stream, const std::pair<T, U>& p) {
