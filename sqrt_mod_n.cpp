@@ -340,8 +340,8 @@ namespace std {
 
 // Computes the square roots of a modulo n.
 // This will also memoize results.
-std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
-    static std::unordered_map<std::pair<int64_t, int64_t>, std::vector<int64_t>> memo;
+std::set<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
+    static std::unordered_map<std::pair<int64_t, int64_t>, std::set<int64_t>> memo;
     auto pr = std::make_pair(a, n);
     if (memo[pr].size() > 0) {
         return memo[pr];
@@ -371,24 +371,26 @@ std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
                         if (a == 1) {
                             return memo[pr] = {1ll, (n >> 1) - 1ll, (n >> 1) + 1ll, n - 1ll};
                         } else {
-                            std::vector<int64_t> roots;
-                            auto xs = sqrt_mod_n(a, n >> 1);
-                            for (int i = 0; i < xs.size(); ++i) {
-                                int64_t x = xs[i];
-                                int64_t j = (((x*x - a) >> (k - 1)) % 2 == 1? 1 : 0);
-                                int64_t r = x + j*(1 << (k - 2));
-                                roots.push_back(r);
-                                roots.push_back(n - r);
+                            std::set<int64_t> roots;
+                            for (auto x : sqrt_mod_n(a, n >> 1)) {
+                                int64_t i = (((x*x - a) >> (k - 1)) % 2 == 1? 1 : 0);
+                                int64_t r = x + i*(1 << (k - 2));
+                                roots.insert(r);
+                                roots.insert(n - r);
                             }
                             return memo[pr] = roots;
                         }
                     }
                 }
             } else if (is_prime(n)) {
-                return memo[pr] = tonelli_shanks(a, n);
+                std::set<int64_t> roots;
+                for (auto r : tonelli_shanks(a, n)) {
+                    roots.insert(r);
+                }
+                return memo[pr] = roots;
             } else {
                 auto pe = factorize(n);
-                
+
                 // In the case of n being just an odd prime power.
                 if (pe.size() == 1) {
                     int64_t p = pe[0].first;
@@ -408,7 +410,7 @@ std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
                         pk *= p;
                         pi *= p;
                     }
-                    return memo[pr] = roots;
+                    return memo[pr] = {roots[0], roots[1]};
                 } else {
                     // Construct solutions for prime powers.
                     std::vector<std::vector<std::pair<int64_t, int64_t>>> solutions(pe.size());
@@ -421,13 +423,12 @@ std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
                         }
                     }
 
-                    // Construct all the possible square roots using 
+                    // Construct all the possible square roots using
                     // the Chinese Remainder Theorem.
                     auto cp = cartesian_product(solutions);
-                    std::vector<int64_t> roots;
-                    roots.reserve(cp.size());
+                    std::set<int64_t> roots;
                     for (auto&& p : cp) {
-                        roots.push_back(chinese_remainder_theorem(p));
+                        roots.insert(chinese_remainder_theorem(p));
                     }
                     return memo[pr] = roots;
                 }
