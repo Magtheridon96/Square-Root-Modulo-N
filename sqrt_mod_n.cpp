@@ -118,52 +118,52 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
         return {};
     }
 
-	int64_t q = p - 1;
-	int64_t s = 0;
-	while (~q & 1) {
-		q >>= 1;
-		s += 1;
-	}
-	
-	// p = 3 (mod 4)
-	// Hence, the solutions are trivial.
-	if (s == 1) {
-		auto x = mod_pow(n, (p + 1)/4, p);
-		return {x, p - x};
-	}
-	
-	// Select a quadratic non-residue (mod p)
-	// This runs in expected logarithmic time
-	// given Lagrange's theorem on the number of
-	// quadratic residues modulo p.
-	int64_t z = 0;
-	for (int64_t k = 1; k < p; ++k) {
-		if (!is_quadratic_residue(k, p)) {
-			z = k;
-			break;
-		}
-	}
-	
-	int64_t c = mod_pow(z, q, p);
-	int64_t r = mod_pow(n, (q + 1)/2, p);
-	int64_t t = mod_pow(n, q, p);
-	int m = s;
-	
-	while (t != 1) {
-		int i = 1;
-		int64_t x = (t*t) % p;
-		while (x != 1) {
-			x = (x*x) % p;
-			i += 1;
-		}
-		int64_t b = mod_pow(c, (1ll << (m - i - 1)), p);
-		r = (r*b) % p;
-		c = (b*b) % p;
-		t = (t*c) % p;
-		m = i;
-	}
-	
-	return {r, p - r};
+    int64_t q = p - 1;
+    int64_t s = 0;
+    while (~q & 1) {
+    	q >>= 1;
+    	s += 1;
+    }
+    
+    // p = 3 (mod 4)
+    // Hence, the solutions are trivial.
+    if (s == 1) {
+    	auto x = mod_pow(n, (p + 1)/4, p);
+    	return {x, p - x};
+    }
+    
+    // Select a quadratic non-residue (mod p)
+    // This runs in expected logarithmic time
+    // given Lagrange's theorem on the number of
+    // quadratic residues modulo p.
+    int64_t z = 0;
+    for (int64_t k = 1; k < p; ++k) {
+        if (!is_quadratic_residue(k, p)) {
+            z = k;
+            break;
+        }
+    }
+    
+    int64_t c = mod_pow(z, q, p);
+    int64_t r = mod_pow(n, (q + 1)/2, p);
+    int64_t t = mod_pow(n, q, p);
+    int64_t m = s;
+    
+    while (t != 1) {
+        int i = 1;
+        int64_t x = (t*t) % p;
+        while (x != 1) {
+            x = (x*x) % p;
+            i += 1;
+        }
+        int64_t b = mod_pow(c, (1ll << (m - i - 1)), p);
+        r = (r*b) % p;
+        c = (b*b) % p;
+        t = (t*c) % p;
+        m = i;
+    }
+    
+    return {r, p - r};
 }
 
 // Cartesian Product helper function
