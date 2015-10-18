@@ -125,18 +125,18 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
 		q >>= 1;
 		s += 1;
 	}
-
+	
 	// p = 3 (mod 4)
 	// Hence, the solutions are trivial.
 	if (s == 1) {
 		auto x = mod_pow(n, (p + 1)/4, p);
-        return {x, p - x};
+		return {x, p - x};
 	}
-
+	
 	// Select a quadratic non-residue (mod p)
-    // This runs in expected logarithmic time
-    // given Lagrange's theorem on the number of
-    // quadratic residues modulo p.
+	// This runs in expected logarithmic time
+	// given Lagrange's theorem on the number of
+	// quadratic residues modulo p.
 	int64_t z = 0;
 	for (int64_t k = 1; k < p; ++k) {
 		if (!is_quadratic_residue(k, p)) {
@@ -144,12 +144,12 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
 			break;
 		}
 	}
-
+	
 	int64_t c = mod_pow(z, q, p);
 	int64_t r = mod_pow(n, (q + 1)/2, p);
 	int64_t t = mod_pow(n, q, p);
 	int m = s;
-
+	
 	while (t != 1) {
 		int i = 1;
 		int64_t x = (t*t) % p;
@@ -163,7 +163,7 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
 		t = (t*c) % p;
 		m = i;
 	}
-
+	
 	return {r, p - r};
 }
 
@@ -339,7 +339,8 @@ namespace std {
     };
 }
 
-// Computes the square root of a mod n
+// Computes the square roots of a modulo n.
+// This will also memoize results.
 std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
     static std::unordered_map<std::pair<int64_t, int64_t>, std::vector<int64_t>> memo;
     auto pr = std::make_pair(a, n);
@@ -388,6 +389,8 @@ std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
                 return memo[pr] = tonelli_shanks(a, n);
             } else {
                 auto pe = factorize(n);
+                
+                // In the case of n being just an odd prime power.
                 if (pe.size() == 1) {
                     int64_t p = pe[0].first;
                     int64_t k = pe[0].second;
@@ -432,5 +435,6 @@ std::vector<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
             }
         }
     }
+    // No solutions.
     return {};
 }
