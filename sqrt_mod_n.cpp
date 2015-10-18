@@ -1,25 +1,41 @@
 #include <unordered_map>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include <vector>
 #include <tuple>
 #include <set>
 
+// Outputs a pair of whatever to a stream.
 template<typename T, typename U>
 std::ostream& operator<<(std::ostream& stream, const std::pair<T, U>& p) {
     std::cout << "(" << p.first << ", " << p.second << ")";
 }
 
-// Outputs vector to stream.
-// Requires std::ostream operator<<(std::ostream, T) to exist.
+// Outputs a vector to a stream.
 template<typename T>
-std::ostream& operator<<(std::ostream& stream, const std::vector<T>& v) {
-    if (v.size() == 0) {
+std::ostream& operator<<(std::ostream& stream, const std::vector<T>& container) {
+    if (container.size() == 0) {
         return stream << "{}";
     } else {
-        stream << '{' << v[0];
-        for (int i = 1; i < v.size(); ++i) {
-            stream << ", " << v[i];
+        auto it = container.begin();
+        stream << '{' << *it++;
+        while (it != container.end()) {
+            stream << ", " << *it++;
+        }
+        return stream << '}';
+    }
+}
+
+// Outputs a set to a stream.
+template<typename T>
+std::ostream& operator<<(std::ostream& stream, const std::set<T>& container) {
+    if (container.size() == 0) {
+        return stream << "{}";
+    } else {
+        auto it = container.begin();
+        stream << '{' << *it++;
+        while (it != container.end()) {
+            stream << ", " << *it++;
         }
         return stream << '}';
     }
@@ -125,14 +141,14 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
     	q >>= 1;
     	s += 1;
     }
-    
+
     // p = 3 (mod 4)
     // Hence, the solutions are trivial.
     if (s == 1) {
     	auto x = mod_pow(n, (p + 1)/4, p);
     	return {x, p - x};
     }
-    
+
     // Select a quadratic non-residue (mod p)
     // This runs in expected logarithmic time
     // given Lagrange's theorem on the number of
@@ -144,12 +160,12 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
             break;
         }
     }
-    
+
     int64_t c = mod_pow(z, q, p);
     int64_t r = mod_pow(n, (q + 1)/2, p);
     int64_t t = mod_pow(n, q, p);
     int64_t m = s;
-    
+
     while (t != 1) {
         int i = 1;
         int64_t x = (t*t) % p;
@@ -158,12 +174,14 @@ std::vector<int64_t> tonelli_shanks(int64_t n, int64_t p) {
             i += 1;
         }
         int64_t b = mod_pow(c, (1ll << (m - i - 1)), p);
+        // You could use mod_mul to ensure safety when
+        // handling very large numbers.
         r = (r*b) % p;
         c = (b*b) % p;
         t = (t*c) % p;
         m = i;
     }
-    
+
     return {r, p - r};
 }
 
@@ -343,6 +361,7 @@ namespace std {
 // This will also memoize results.
 std::set<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
     static std::unordered_map<std::pair<int64_t, int64_t>, std::set<int64_t>> memo;
+
     auto pr = std::make_pair(a, n);
     if (memo[pr].size() > 0) {
         return memo[pr];
@@ -438,4 +457,12 @@ std::set<int64_t> sqrt_mod_n(int64_t a, int64_t n) {
     }
     // No solutions.
     return {};
+}
+
+int main() {
+    // Example usage.
+    std::cout << sqrt_mod_n(1, 5777) << '\n';
+    std::cout << sqrt_mod_n(1, 19937) << '\n';
+    std::cout << sqrt_mod_n(1, 9001) << '\n';
+    return 0;
 }
