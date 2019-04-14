@@ -2,7 +2,11 @@
 
 This is a C++ implementation of a generalized Square Root function. I wrote it while working on some Project Euler problems.
 
-# Algorithm
+# Remark
+
+This works for arbitrary values of `N` (composites and primes). It's trivial to do this for primes, but there are some edge cases to handle when doing it for arbitrary composite moduli.
+
+# Algorithm Details
 
 To compute the square root of a non-zero `a` modulo an odd prime `p`, we use the [Tonelli-Shanks Algorithm](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm).
 This square root exists if and only if `a` is quadratic residue modulo `p`. To test this, 
